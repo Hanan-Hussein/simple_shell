@@ -1,74 +1,85 @@
 #include "shell.h"
 
 /**
- **_strncpy - copies a string
- *@dest: the destination string to be copied to
- *@src: the source string
- *@n: the amount of characters to be copied
- *Return: the concatenated string
+ *_eputs - prints an input string
+ * @str: the string to be printed
+ *
+ * Return: Nothing
  */
-char *_strncpy(char *dest, char *src, int n)
+void _eputs(char *str)
 {
-	int i, j;
-	char *s = dest;
+	int i = 0;
 
-	i = 0;
-	while (src[i] != '\0' && i < n - 1)
+	if (!str)
+		return;
+	while (str[i] != '\0')
 	{
-		dest[i] = src[i];
+		_eputchar(str[i]);
 		i++;
 	}
-	if (i < n)
-	{
-		j = i;
-		while (j < n)
-		{
-			dest[j] = '\0';
-			j++;
-		}
-	}
-	return (s);
 }
 
 /**
- **_strncat - concatenates two strings
- *@dest: the first string
- *@src: the second string
- *@n: the amount of bytes to be maximally used
- *Return: the concatenated string
+ * _eputchar - writes the character c to stderr
+ * @c: The character to print
+ *
+ * Return: On success 1.
+ * On error, -1 is returned, and errno is set appropriately.
  */
-char *_strncat(char *dest, char *src, int n)
+int _eputchar(char c)
 {
-	int i, j;
-	char *s = dest;
+	static int i;
+	static char buf[WRITE_BUF_SIZE];
 
-	i = 0;
-	j = 0;
-	while (dest[i] != '\0')
-		i++;
-	while (src[j] != '\0' && j < n)
+	if (c == BUF_FLUSH || i >= WRITE_BUF_SIZE)
 	{
-		dest[i] = src[j];
-		i++;
-		j++;
+		write(2, buf, i);
+		i = 0;
 	}
-	if (j < n)
-		dest[i] = '\0';
-	return (s);
+	if (c != BUF_FLUSH)
+		buf[i++] = c;
+	return (1);
 }
 
 /**
- **_strchr - locates a character in a string
- *@s: the string to be parsed
- *@c: the character to look for
- *Return: (s) a pointer to the memory area s
+ * _putfd - writes the character c to given fd
+ * @c: The character to print
+ * @fd: The filedescriptor to write to
+ *
+ * Return: On success 1.
+ * On error, -1 is returned, and errno is set appropriately.
  */
-char *_strchr(char *s, char c)
+int _putfd(char c, int fd)
 {
-	do {
-		if (*s == c)
-			return (s);
-	} while (*s++ != '\0');
+	static int i;
+	static char buf[WRITE_BUF_SIZE];
 
-	return (NULL);
+	if (c == BUF_FLUSH || i >= WRITE_BUF_SIZE)
+	{
+		write(fd, buf, i);
+		i = 0;
+	}
+	if (c != BUF_FLUSH)
+		buf[i++] = c;
+	return (1);
+}
+
+/**
+ *_putsfd - prints an input string
+ * @str: the string to be printed
+ * @fd: the filedescriptor to write to
+ *
+ * Return: the number of chars put
+ */
+int _putsfd(char *str, int fd)
+{
+	int i = 0;
+
+	if (!str)
+		return (0);
+	while (*str)
+	{
+		i += _putfd(*str++, fd);
+	}
+	return (i);
 }
